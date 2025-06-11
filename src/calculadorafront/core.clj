@@ -23,6 +23,8 @@
 (defn mostrar-transacoes [id transacao]
   (println (str id ". Tipo: " (:tipo transacao) " | Descricao: " (:descricao transacao) "| Data: " (:data transacao) " | Quantidade: " (:quantidade transacao) "| Calorias: " (:valor transacao))))
 
+(defn mostrar-alimento [id alimento]
+  (println (str id ". Descricao: " (:descricao alimento) " | Calorias por " (:quantidade alimento) ": " (:calorias alimento))))
 
 (defn encode-url [s]
   (URLEncoder/encode s "UTF-8"))
@@ -69,14 +71,17 @@
                 data (ler-string "Data (dd/MM/yyyy)")
                 quantidade (ler-inteiro "Quantidade (gramas)")
                 alimentos (chamar-get (str "/alimentos?descricao=" descricao))]
-                (println alimentos)
-            ;;     (client/post (str api-url "/registrar")
-            ;;              {:body (json/generate-string {:tipo "ganho"
-            ;;                                            :descricao descricao
-            ;;                                            :data data
-            ;;                                            :quantidade quantidade})
-            ;;               :headers {"Content-Type" "application/json"}})
-            ;; (println "\nConsumo registrado!")
+                (println "Escolha o alimento:")
+                (doall (map mostrar-alimento (range 1 6) (:alimentos (:alimentos alimentos))))
+                (let [index (ler-inteiro "Escolha o numero do alimento")]
+                      (client/post (str api-url "/registrar")
+                         {:body (json/generate-string {:tipo "ganho"
+                                                       :descricao descricao
+                                                       :data data
+                                                       :quantidade quantidade
+                                                       :index (dec index)})
+                          :headers {"Content-Type" "application/json"}})
+            (println "\nConsumo registrado!"))
             ))
       2 (do
           (let [descricao (ler-string "Descricao do exercicio")
@@ -86,7 +91,7 @@
                 exercicios (:exercicios resposta)]
             (println "Escolha o exercicio:")
             (doall (map mostrar-exercicio (range 1 6) (:exercicios exercicios)))
-                (let [index (ler-inteiro "Escolha o numero do exercicio:")]
+                (let [index (ler-inteiro "Escolha o numero do exercicio")]
                   (client/post (str api-url "/registrar")
                          {:body (json/generate-string {:tipo "perda"
                                                        :descricao descricao
